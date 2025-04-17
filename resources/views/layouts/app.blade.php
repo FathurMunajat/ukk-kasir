@@ -33,29 +33,30 @@
         <span class="text-xl font-semibold text-gray-800">Kasir Drone</span>
       </div>
 
-      
+      @if (in_array(Auth::user()->role, ['admin', 'user']))
       <nav class="mt-4 space-y-1 px-4">
         <a href="{{ url('/Dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 text-gray-800">
           <i class="bi bi-house-door-fill"></i> Dashboard
         </a>
-      
+        @endif
 
+        @if (in_array(Auth::user()->role, ['admin', 'user']))
         <a href="{{ url('/Product') }}" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 text-gray-800">
           <i class="bi bi-bag-fill"></i> Produk
         </a>
+        @endif
       
-      
-        
+        @if (in_array(Auth::user()->role, ['admin', 'user']))
         <a href="{{ url('/Purchase') }}" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 text-gray-800">
           <i class="bi bi-cart-fill"></i> Pembelian
         </a>
-        
+        @endif
   
-        
+        @if (Auth::user()->role === 'admin')
         <a href="{{ url('/User') }}" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 text-gray-800">
           <i class="bi bi-person-fill"></i> User
         </a>
-       
+        @endif
 
       </nav>
     </aside>
