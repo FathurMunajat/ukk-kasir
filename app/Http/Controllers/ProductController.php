@@ -28,12 +28,12 @@ class ProductController extends Controller
             'stock'  => 'required|integer|min:0',
             'image'  => 'required|image|mimes:jpg,jpeg,png|max:2048',
         ]);
-    
+
         // Proses upload gambar
         $imageName = time() . '.' . $request->image->getClientOriginalExtension();
         $request->image->move(public_path('images'), $imageName);
         // Storage::move('Product/'.$imageName,$request->image);
-    
+
         // Simpan ke database hanya SEKALI
         Product::create([
             'name'  => $request->name,
@@ -41,10 +41,10 @@ class ProductController extends Controller
             'stock' => $request->stock,
             'image' => $imageName, // path relatif ke /storage
         ]);
-    
+
         return redirect()->route('Product.index')->with('success', 'Produk berhasil ditambahkan!');
     }
-    
+
 
     public function edit($id)
     {
@@ -53,28 +53,28 @@ class ProductController extends Controller
     }
 
     public function update(Request $request, $id)
-{
-    $product = Product::findOrFail($id);
+    {
+        $product = Product::findOrFail($id);
 
-    $request->validate([
-        'name'  => 'required|string|max:255',
-        'price' => 'required|numeric|min:0',
-        'stock' => 'required|integer|min:0',
-        'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-    ]);
+        $request->validate([
+            'name'  => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
 
-    $data = $request->only(['name', 'price', 'stock']);
+        $data = $request->only(['name', 'price', 'stock']);
 
-    if ($request->hasFile('image')) {
-        $imageName = time() . '.' . $request->image->getClientOriginalExtension();
-        $request->image->storeAs('public/products', $imageName);
-        $data['image'] = 'products/' . $imageName;
+        if ($request->hasFile('image')) {
+            $imageName = time() . '.' . $request->image->getClientOriginalExtension();
+            $request->image->storeAs('public/products', $imageName);
+            $data['image'] = 'products/' . $imageName;
+        }
+
+        $product->update($data);
+
+        return redirect()->route('Product.index')->with('success', 'Produk berhasil diperbarui!');
     }
-
-    $product->update($data);
-
-    return redirect()->route('Product.index')->with('success', 'Produk berhasil diperbarui!');
-}
 
 
     public function destroy($id)
@@ -84,18 +84,15 @@ class ProductController extends Controller
     }
 
     public function updateStock(Request $request, $id)
-{
-    $request->validate([
-        'stock' => 'required|integer|min:0'
-    ]);
+    {
+        $request->validate([
+            'stock' => 'required|integer|min:0|max:9999'
+        ]);
 
-    $product = Product::findOrFail($id);
-    $product->stock = $request->stock;
-    $product->save();
+        $product = Product::findOrFail($id);
+        $product->stock = $request->stock;
+        $product->save();
 
-    return redirect()->route('Product.index')->with('success', 'Stok berhasil diperbarui!');
+        return redirect()->route('Product.index')->with('success', 'Stok berhasil diperbarui!');
+    }
 }
-
-
-}
-

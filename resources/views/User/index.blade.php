@@ -34,6 +34,7 @@
                         <th scope="col" class="px-6 py-3 text-left">Nama</th>
                         <th scope="col" class="px-6 py-3 text-left">Email</th>
                         <th scope="col" class="px-6 py-3 text-center">Role</th>
+
                         <th scope="col" class="px-6 py-3 text-center">Aksi</th>
                     </tr>
                 </thead>
@@ -65,17 +66,21 @@
                                     </a>
 
                                     <!-- Delete -->
-                                    <form action="{{ route('user.destroy', $user) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            class="text-red-600 hover:text-red-800 transition duration-200"
-                                            onclick="return confirm('Yakin ingin menghapus pengguna ini?')" title="Hapus">
-                                            <i class="fas fa-trash fa-lg"></i> Hapus
-                                        </button>
-                                    </form>
+                                    @if ($user->role !== 'admin')
+                                        <form action="{{ route('user.destroy', $user) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                class="text-red-600 hover:text-red-800 transition duration-200"
+                                                onclick="return confirm('Yakin ingin menghapus pengguna ini?')"
+                                                title="Hapus">
+                                                <i class="fas fa-trash fa-lg"></i> Hapus
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
+
 
                         </tr>
                     @endforeach

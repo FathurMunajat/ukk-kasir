@@ -31,12 +31,6 @@
             </div>
 
             <div class="mb-3">
-                <label for="stock" class="form-label">Stok</label>
-                <input type="number" class="form-control" id="stock" name="stock"
-                    value="{{ old('stock', $item->stock) }}" required>
-            </div>
-
-            <div class="mb-3">
                 <label for="price_display" class="form-label">Harga</label>
                 <div class="input-group">
                     <span class="input-group-text">Rp</span>

@@ -1,45 +1,54 @@
 @extends('layouts.app')
 
-@section('content')
-<div class="container">
-    <h3 class="mb-4">Create New Purchase</h3>
+@section('title', 'Tambah Penjualan')
 
-    <form action="{{ route('Purchase.selectProduct') }}" method="POST">
+@section('content')
+<div class="container py-4">
+    <h4 class="mb-4 fw-semibold">Tambah Penjualan</h4>
+
+    <form action="{{ route('Purchase.cart') }}" method="POST">
+
         @csrf
 
-        <div class="row">
-            @foreach ($products as $product)
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <img src="{{ asset('images/' . $product->image) }}" class="card-img-top" alt="{{ $product->name_product }}" style="height: 200px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ $product->name_product }}</h5>
-                        <p>Price: Rp {{ number_format($product->price, 0, ',', '.') }}</p>
-                        <p>Stock: {{ $product->stock }}</p>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach($products as $product)
+                <div class="col">
+                    <div class="card border-0 shadow-sm h-100">
+                        <img src="{{ asset('images/' . $product->image) }}" 
+                             class="card-img-top" 
+                             alt="{{ $product->name }}" 
+                             style="height: 160px; object-fit: contain;">
 
-                        @if($product->stock > 0)
-                            <div class="input-group mb-3">
-                                <button class="btn btn-outline-secondary btn-decrement" type="button">-</button>
-                                <input type="number" name="quantities[{{ $product->id }}]" class="form-control text-center quantity-input" value="0" min="0" max="{{ $product->stock }}">
-                                <button class="btn btn-outline-secondary btn-increment" type="button">+</button>
-                            </div>
-                            <p>Subtotal: Rp <span class="subtotal" data-price="{{ $product->price }}">0</span></p>
-                        @else
-                            <div class="alert alert-danger">Stock not available</div>
-                        @endif
+                        <div class="card-body text-center">
+                            <h6 class="fw-bold">{{ $product->name }}</h6>
+                            <p class="small text-muted mb-1">Stok: {{ $product->stock }}</p>
+                            <p class="fw-semibold">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+
+                            @if ($product->stock > 0)
+                                <div class="input-group input-group-sm justify-content-center mb-2" style="max-width: 130px; margin: 0 auto;">
+                                    <button class="btn btn-outline-secondary btn-decrement" type="button">−</button>
+                                    <input type="number" name="quantities[{{ $product->id }}]" 
+                                           class="form-control text-center quantity-input"
+                                           value="0" min="0" max="{{ $product->stock }}">
+                                    <button class="btn btn-outline-secondary btn-increment" type="button">+</button>
+                                </div>
+                                <small class="text-muted">Sub Total: Rp <span class="subtotal" data-price="{{ $product->price }}">0</span></small>
+                            @else
+                                <div class="alert alert-danger p-1 mt-2 small">Stok habis</div>
+                            @endif
+                        </div>
                     </div>
                 </div>
-            </div>
             @endforeach
         </div>
-        <input type="hidden" name="total_amount" id="total-amount-input" value="0">
 
-        <div class="fixed-bottom bg-white py-3 px-4 shadow-sm border-top" style="margin-left: 0px; z-index: 1000;">
-            <div class="d-flex flex-column align-items-center justify-content-center">
-                <h5 class="mb-2 ">Total: Rp <span id="total-amount">0</span></h5>
-                <div id="selected-products" class="mb-2"></div>
-                <button type="submit" class="btn btn-primary px-5">
-                    Next <i class="fas fa-arrow-right ml-2"></i>
+        <input type="hidden" name="total_payment" id="total-amount-input" value="0">
+
+        <div class="fixed-bottom bg-white py-3 px-4 border-top shadow-sm" style="z-index: 1050;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <strong>Total: Rp <span id="total-amount">0</span></strong>
+                <button type="submit" class="btn btn-primary px-4" id="submitButton" disabled>
+                    Lanjut <i class="fas fa-arrow-right ms-1"></i>
                 </button>
             </div>
         </div>
@@ -54,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const subtotals = document.querySelectorAll('.subtotal');
     const totalAmountDisplay = document.getElementById('total-amount');
     const totalAmountInput = document.getElementById('total-amount-input');
-    const submitButton = document.querySelector('button[type="submit"]');
+    const submitButton = document.getElementById('submitButton');
 
     function updateTotals() {
         let total = 0;
@@ -66,7 +75,6 @@ document.addEventListener('DOMContentLoaded', function () {
             subtotals[index].innerText = subtotal.toLocaleString('id-ID');
             total += subtotal;
 
-            // Check if any product is selected (quantity > 0)
             if (qty > 0) {
                 productSelected = true;
             }
@@ -74,13 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         totalAmountDisplay.innerText = total.toLocaleString('id-ID');
         totalAmountInput.value = total;
-
-        // Enable or disable submit button based on whether a product is selected
-        if (productSelected) {
-            submitButton.disabled = false;
-        } else {
-            submitButton.disabled = true;
-        }
+        submitButton.disabled = !productSelected;
     }
 
     document.querySelectorAll('.btn-increment').forEach((btn, index) => {
@@ -90,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function () {
             let value = parseInt(input.value) || 0;
             if (value < max) {
                 input.value = value + 1;
-                updateTotals();
+                input.dispatchEvent(new Event('input'));
             }
         });
     });
@@ -101,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function () {
             let value = parseInt(input.value) || 0;
             if (value > 0) {
                 input.value = value - 1;
-                updateTotals();
+                input.dispatchEvent(new Event('input'));
             }
         });
     });
@@ -110,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
         input.addEventListener('input', updateTotals);
     });
 
-    // Initial call to disable the submit button if no product is selected
-    updateTotals();
+    updateTotals(); // call once on load
 });
 </script>
+@endsection
